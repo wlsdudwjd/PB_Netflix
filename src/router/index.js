@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import PopularView from '../views/PopularView.vue'
 import SignInView from '../views/SignInView.vue'
+import SearchView from '../views/SearchView.vue'
 import { isAuthenticated } from '../utils/auth'
 
 const router = createRouter({
@@ -17,6 +18,12 @@ const router = createRouter({
       path: '/popular',
       name: 'popular',
       component: PopularView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/search',
+      name: 'search',
+      component: SearchView,
       meta: { requiresAuth: true },
     },
     {
