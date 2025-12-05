@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import PopularView from '../views/PopularView.vue'
 import SignInView from '../views/SignInView.vue'
 import { isAuthenticated } from '../utils/auth'
 
@@ -10,6 +11,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/popular',
+      name: 'popular',
+      component: PopularView,
       meta: { requiresAuth: true },
     },
     {
