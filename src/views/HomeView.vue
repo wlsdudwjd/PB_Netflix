@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import TopNav from '../components/TopNav.vue'
 import { clearSession, getSession, getStoredUser } from '../utils/auth'
 
 const router = useRouter()
@@ -92,14 +93,7 @@ onMounted(() => {
 
 <template>
   <main class="home-shell">
-    <header class="topbar">
-      <div class="logo">NETFLIX</div>
-      <div class="user">
-        <span class="badge">추천</span>
-        <span class="email">Hi, {{ session?.email || 'Guest' }}</span>
-        <button type="button" class="ghost" @click="handleLogout">로그아웃</button>
-      </div>
-    </header>
+    <TopNav :active="'home'" :email="session?.email" @logout="handleLogout" />
 
     <section v-if="state.hero" class="hero">
       <div class="hero-copy">
