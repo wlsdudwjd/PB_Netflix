@@ -29,6 +29,7 @@ const go = (name) => {
       <nav class="nav-links">
         <button :class="{ active: active === 'home' }" @click="go('home')">홈</button>
         <button :class="{ active: active === 'popular' }" @click="go('popular')">대세 콘텐츠</button>
+        <button :class="{ active: active === 'search' }" @click="go('search')">검색</button>
       </nav>
     </div>
     <div class="right">
