@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import PopularView from '../views/PopularView.vue'
 import SignInView from '../views/SignInView.vue'
 import SearchView from '../views/SearchView.vue'
+import WishlistView from '../views/WishlistView.vue'
 import { isAuthenticated } from '../utils/auth'
 
 const router = createRouter({
@@ -26,6 +27,18 @@ const router = createRouter({
       component: SearchView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/wishlist',
+      name: 'wishlist',
+      component: WishlistView,
+      meta: { requiresAuth: true },
+    },
+      {
+          path: '/wishlist',
+          name: 'wishlist',
+          component: WishlistView,
+          meta: { requiresAuth: true },
+      },
     {
       path: '/signin',
       name: 'signin',
