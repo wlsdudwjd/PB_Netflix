@@ -117,8 +117,8 @@ onMounted(() => {
     <section v-else class="content">
       <div class="poster">
         <img :src="imageUrl(state.movie.poster_path)" :alt="state.movie.title || '포스터'" />
-        <button type="button" class="primary" @click="toggleWish">
-          {{ isWished ? '찜 해제' : '찜하기' }}
+        <button type="button" class="primary wish-pill" @click="toggleWish">
+          {{ isWished ? '★ 찜 해제' : '★ 찜하기' }}
         </button>
       </div>
       <div class="info">
@@ -161,7 +161,7 @@ onMounted(() => {
           </div>
         </div>
         <div class="recommend" v-if="state.recommendations.length">
-          <p class="section-title">추천 영화</p>
+          <p class="section-title">연관 영화</p>
           <div class="recommend-grid">
             <MovieCard
               v-for="movie in state.recommendations"
@@ -222,16 +222,30 @@ onMounted(() => {
 .primary {
   margin-top: 0.6rem;
   width: 100%;
-  background: linear-gradient(120deg, #e50914, #b81d24);
+  background: linear-gradient(120deg, #e50914, #ff6a00);
   border: none;
   color: #fff;
-  padding: 0.6rem 0.9rem;
-  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
   cursor: pointer;
   font-weight: 800;
-  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth);
+  letter-spacing: -0.01em;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth), filter 160ms var(--ease-smooth);
+  box-shadow: 0 18px 38px rgba(229, 9, 20, 0.35);
 }
 
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 46px rgba(229, 9, 20, 0.45);
+  filter: brightness(1.03);
+}
+
+.wish-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 .info h1 {
   margin: 0.3rem 0 0.5rem;
 }
