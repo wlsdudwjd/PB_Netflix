@@ -70,6 +70,7 @@ const go = (name) => {
 .nav-links {
   display: inline-flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .nav-links button {

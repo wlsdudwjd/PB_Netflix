@@ -106,7 +106,7 @@ onMounted(() => {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.75rem;
 }
 
@@ -173,5 +173,21 @@ onMounted(() => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .wishlist-shell {
+    width: calc(100% - 1rem);
+    padding: 0.6rem;
+    gap: 0.75rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .results {
+    padding: 0.6rem;
+  }
 }
 </style>
