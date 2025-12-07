@@ -1,8 +1,10 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
+import MovieCard from '../components/MovieCard.vue'
 import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
 const session = computed(() => getSession())
@@ -14,6 +16,8 @@ const state = reactive({
   genres: {},
   sections: [],
 })
+const wishlist = ref([])
+const toasts = ref([])
 
 const sectionsConfig = [
   { key: 'trending', title: '오늘의 트렌딩', path: '/trending/movie/day' },
@@ -87,8 +91,38 @@ const genreNames = (genreIds) =>
     .join(' · ')
 
 onMounted(() => {
+  wishlist.value = getWishlist()
   loadMovies()
 })
+
+const addToast = (message, type = 'info') => {
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now()
+  toasts.value.push({ id, message, type })
+  setTimeout(() => removeToast(id), 3500)
+}
+
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id)
+}
+
+const toggleWish = (movie) => {
+  const normalized = {
+    id: movie.id,
+    title: movie.title || movie.name || movie.original_title,
+    poster: movie.poster_path ? imageUrl(movie.poster_path) : '',
+    overview: movie.overview,
+    release_date: movie.release_date,
+    vote_average: movie.vote_average,
+  }
+  const before = wishlist.value.some((m) => m.id === movie.id)
+  wishlist.value = toggleWishlist(normalized)
+  addToast(before ? '찜 목록에서 제거되었습니다.' : '찜한 리스트에 추가되었습니다.', before ? 'info' : 'success')
+}
+
+const goDetail = (movie) => {
+  router.push({ name: 'detail', params: { id: movie.id } })
+}
 </script>
 
 <template>
@@ -129,29 +163,20 @@ onMounted(() => {
           <span class="pill">TMDB</span>
         </header>
         <div class="cards">
-          <div v-for="movie in section.items" :key="movie.id" class="card">
-            <div class="poster">
-              <img
-                :src="imageUrl(movie.poster_path)"
-                :alt="movie.title || movie.name"
-                loading="lazy"
-              />
-              <span class="rating" v-if="movie.vote_average">★ {{ movie.vote_average.toFixed(1) }}</span>
-            </div>
-            <div class="copy">
-              <h3>{{ movie.title || movie.name }}</h3>
-              <p class="meta-line">
-                <span v-if="movie.release_date">개봉 {{ movie.release_date }}</span>
-                <span v-if="movie.genre_ids?.length">{{ genreNames(movie.genre_ids) }}</span>
-              </p>
-              <p class="overview">
-                {{ movie.overview || '줄거리가 제공되지 않았습니다.' }}
-              </p>
-            </div>
-          </div>
+          <MovieCard
+            v-for="movie in section.items"
+            :key="movie.id"
+            :movie="movie"
+            :poster-url="imageUrl(movie.poster_path)"
+            :in-wishlist="wishlist.some((m) => m.id === movie.id)"
+            @toggle="toggleWish"
+            @view="goDetail"
+            @detail="goDetail"
+          />
         </div>
       </article>
     </section>
+    <ToastStack :items="toasts" @dismiss="removeToast" />
   </main>
 </template>
 
@@ -297,70 +322,6 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.card {
-  background: #0f0f14;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-}
-
-.poster {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  background: #15151b;
-}
-
-.poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.rating {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.72);
-  color: #ffd166;
-  padding: 0.35rem 0.55rem;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 0.9rem;
-}
-
-.copy {
-  padding: 0.75rem 0.85rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.copy h3 {
-  font-size: 1.05rem;
-  font-weight: 800;
-}
-
-.meta-line {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.overview {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 
 .loading,
 .error {
