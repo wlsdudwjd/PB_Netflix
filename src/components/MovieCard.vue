@@ -22,7 +22,7 @@ const emit = defineEmits(['toggle', 'view', 'detail'])
     <div class="poster" @click="emit('view', movie)">
       <img :src="posterUrl" :alt="movie.title || movie.name || '포스터'" loading="lazy" />
       <span class="badge" v-if="movie.vote_average">★ {{ movie.vote_average.toFixed?.(1) || movie.vote_average }}</span>
-      <span v-if="inWishlist" class="bookmark">찜</span>
+      <span v-if="inWishlist" class="bookmark">★</span>
       <div class="overlay">
         <h3>{{ movie.title || movie.name || '제목 없음' }}</h3>
         <p class="meta">
@@ -32,7 +32,7 @@ const emit = defineEmits(['toggle', 'view', 'detail'])
         <p class="overview">{{ movie.overview || '설명이 없습니다.' }}</p>
         <div class="actions">
           <button type="button" class="wish-btn" @click.stop="emit('toggle', movie)">
-            {{ inWishlist ? '찜 해제' : '찜하기' }}
+            {{ inWishlist ? '★ 찜 해제' : '★ 찜하기' }}
           </button>
         </div>
       </div>
@@ -57,7 +57,6 @@ const emit = defineEmits(['toggle', 'view', 'detail'])
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 260px;
   transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
   will-change: transform;
   cursor: pointer;
@@ -89,15 +88,12 @@ const emit = defineEmits(['toggle', 'view', 'detail'])
   color: #ffd166;
   padding: 0.25rem 0.45rem;
   border-radius: 8px;
-  font-weight: 800;
-  font-size: 0.9rem;
+  font-weight: 900;
+  font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-}
-
-.bookmark::before {
-  content: '★';
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
 .poster .badge {
@@ -168,23 +164,58 @@ const emit = defineEmits(['toggle', 'view', 'detail'])
 .wish-btn {
   margin-top: auto;
   align-self: flex-start;
-  padding: 0.45rem 0.7rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(0, 0, 0, 0.5);
+  padding: 0.48rem 0.78rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(120deg, #e50914, #ff6a00);
   color: #fff;
   cursor: pointer;
-  transition: transform 150ms var(--ease-smooth), box-shadow 150ms var(--ease-smooth);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 14px 30px rgba(229, 9, 20, 0.3);
+  transition: transform 150ms var(--ease-smooth), box-shadow 150ms var(--ease-smooth), filter 150ms var(--ease-smooth);
 }
 
 .wish-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 16px 36px rgba(229, 9, 20, 0.4);
+  filter: brightness(1.05);
 }
 
 .actions {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .card {
+    max-width: none;
+  }
+
+  .poster .badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .body h3 {
+    font-size: 0.95rem;
+  }
+
+  .overview {
+    -webkit-line-clamp: 2;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    gap: 0.35rem;
+  }
+
+  .wish-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.65rem;
+  }
 }
 </style>

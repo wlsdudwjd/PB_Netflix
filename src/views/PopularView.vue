@@ -205,7 +205,7 @@ watch(sentinel, () => setupObserver())
 
     <section v-if="mode === 'table'" class="table-wrap">
       <div class="row-head">
-        <h2>대세 콘텐츠 (Table)</h2>
+        <h2>대세 콘텐츠</h2>
       </div>
       <div class="table-grid">
         <MovieCard
@@ -237,20 +237,41 @@ watch(sentinel, () => setupObserver())
 
     <section v-else class="infinite-wrap">
       <div class="row-head">
-        <h2>대세 콘텐츠 (Infinite)</h2>
+        <h2>대세 콘텐츠</h2>
         <span class="pill">자동 로드</span>
       </div>
       <div class="feed">
-        <MovieCard
+        <article
           v-for="movie in feedState.items"
           :key="movie.id"
-          :movie="movie"
-          :poster-url="imageUrl(movie.poster_path)"
-          :in-wishlist="wishlist.some((m) => m.id === movie.id)"
-          @toggle="toggleWish"
-          @view="goDetail"
-          @detail="goDetail"
-        />
+          class="feed-card"
+          @click="goDetail(movie)"
+        >
+          <div class="feed-poster">
+            <img :src="imageUrl(movie.poster_path)" :alt="movie.title || '포스터'" loading="lazy" />
+            <span v-if="movie.vote_average" class="badge">★ {{ movie.vote_average.toFixed?.(1) || movie.vote_average }}</span>
+            <span
+              v-if="wishlist.some((m) => m.id === movie.id)"
+              class="wish-star"
+            >★</span>
+          </div>
+          <div class="feed-body">
+            <div class="feed-head">
+              <h3>{{ movie.title || movie.name }}</h3>
+              <span v-if="movie.release_date" class="pill small">{{ movie.release_date }}</span>
+            </div>
+            <p class="feed-overview">{{ movie.overview || '설명이 없습니다.' }}</p>
+            <div class="feed-actions">
+              <button
+                type="button"
+                class="wish-btn feed-wish"
+                @click.stop="toggleWish(movie)"
+              >
+                {{ wishlist.some((m) => m.id === movie.id) ? '★ 찜 해제' : '★ 찜하기' }}
+              </button>
+            </div>
+          </div>
+        </article>
         <div ref="sentinel" class="sentinel" />
         <div v-if="feedState.loading" class="spinner">Loading...</div>
       </div>
@@ -523,6 +544,129 @@ watch(sentinel, () => setupObserver())
 .feed {
   display: grid;
   gap: 0.9rem;
+  grid-template-columns: 1fr;
+  width: min(900px, 100%);
+  margin: 0 auto;
+}
+
+.feed-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0.9rem;
+  background: radial-gradient(circle at 20% 20%, rgba(229, 9, 20, 0.14), transparent 45%), #10101a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
+}
+
+.feed-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.feed-poster {
+  position: relative;
+  background: #15151b;
+  overflow: hidden;
+}
+
+.feed-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 200ms var(--ease-smooth), filter 200ms var(--ease-smooth);
+}
+
+.feed-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.2));
+}
+
+.feed-card:hover .feed-poster img {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+
+.feed-poster .badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffd166;
+  backdrop-filter: blur(6px);
+}
+
+.wish-star {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffd166;
+  padding: 0.3rem 0.4rem;
+  border-radius: 10px;
+  font-weight: 900;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.feed-body {
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.feed-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.feed-head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+.feed-overview {
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feed-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  align-items: center;
+}
+
+.feed-wish {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 150ms var(--ease-smooth), box-shadow 150ms var(--ease-smooth), filter 150ms var(--ease-smooth);
+}
+
+.feed-wish:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+  filter: brightness(1.05);
 }
 
 .tile.wide {
@@ -591,17 +735,74 @@ watch(sentinel, () => setupObserver())
     width: 100%;
   }
 
-  .table-grid {
-    max-height: none;
-    overflow: visible;
-  }
-
   .popular-shell.no-scroll {
     height: auto;
   }
 
   .tile.wide {
     grid-template-columns: 1fr;
+  }
+
+  .feed {
+    grid-template-columns: 1fr;
+  }
+
+  .feed-card {
+    grid-template-columns: 140px 1fr;
+    gap: 0.65rem;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tabs {
+    transform: scale(0.95);
+    gap: 0.35rem;
+  }
+
+  .table-wrap {
+    padding: 0.5rem;
+  }
+
+  .table-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .pager.bottom {
+    margin-top: 0.35rem;
+  }
+
+  .popular-shell.table-mode {
+    min-height: auto;
+    height: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .feed-card {
+    grid-template-columns: 1fr;
+  }
+
+  .feed-body {
+    padding: 0.75rem 0.8rem 0.9rem;
+  }
+
+  .feed-head h3 {
+    font-size: 1.05rem;
+  }
+
+  .feed-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primary,
+  .ghost {
+    width: 100%;
+    text-align: center;
   }
 }
 </style>
