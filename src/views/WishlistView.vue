@@ -1,8 +1,11 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
+import MovieCard from '../components/MovieCard.vue'
+import ToastStack from '../components/ToastStack.vue'
 import { clearSession, getSession } from '../utils/auth'
+import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
 const session = computed(() => getSession())
@@ -11,6 +14,7 @@ const STORAGE_KEY = 'pb-wishlist'
 const state = reactive({
   items: [],
 })
+const toasts = ref([])
 
 const handleLogout = () => {
   clearSession()
@@ -18,13 +22,36 @@ const handleLogout = () => {
 }
 
 const loadWishlist = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    state.items = Array.isArray(parsed) ? parsed : []
-  } catch (error) {
-    state.items = []
+  state.items = getWishlist()
+}
+
+const goDetail = (movie) => {
+  router.push({ name: 'detail', params: { id: movie.id } })
+}
+
+const addToast = (message, type = 'info') => {
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now()
+  toasts.value.push({ id, message, type })
+  setTimeout(() => removeToast(id), 3500)
+}
+
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id)
+}
+
+const toggleWish = (movie) => {
+  const normalized = {
+    id: movie.id,
+    title: movie.title || movie.name || movie.original_title,
+    poster: movie.poster || movie.poster_path || '',
+    overview: movie.overview,
+    release_date: movie.release_date,
+    vote_average: movie.vote_average,
   }
+  const before = state.items.some((m) => m.id === movie.id)
+  state.items = toggleWishlist(normalized)
+  addToast(before ? '찜 목록에서 제거되었습니다.' : '찜한 리스트에 추가되었습니다.', before ? 'info' : 'success')
 }
 
 onMounted(() => {
@@ -48,21 +75,19 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid">
-        <article v-for="movie in state.items" :key="movie.id || movie.title" class="card">
-          <div class="poster">
-            <img :src="movie.poster || movie.poster_path" :alt="movie.title || '포스터'" loading="lazy" />
-          </div>
-          <div class="body">
-            <h3>{{ movie.title || '제목 없음' }}</h3>
-            <p class="meta">
-              <span v-if="movie.release_date">개봉 {{ movie.release_date }}</span>
-              <span v-if="movie.vote_average">★ {{ movie.vote_average }}</span>
-            </p>
-            <p class="overview">{{ movie.overview || '설명이 없습니다.' }}</p>
-          </div>
-        </article>
+        <MovieCard
+          v-for="movie in state.items"
+          :key="movie.id || movie.title"
+          :movie="movie"
+          :poster-url="movie.poster || movie.poster_path"
+          :in-wishlist="state.items.some((m) => m.id === movie.id)"
+          @toggle="toggleWish"
+          @view="goDetail"
+          @detail="goDetail"
+        />
       </div>
     </section>
+    <ToastStack :items="toasts" @dismiss="removeToast" />
   </main>
 </template>
 
@@ -117,6 +142,8 @@ onMounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .poster {
@@ -129,6 +156,12 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
 }
 
 .body {
@@ -173,6 +206,13 @@ onMounted(() => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 800;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth);
+  will-change: transform;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
 }
 
 @media (max-width: 768px) {

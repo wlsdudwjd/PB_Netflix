@@ -10,17 +10,22 @@ import {
 } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
+import MovieCard from '../components/MovieCard.vue'
+import ToastStack from '../components/ToastStack.vue'
 import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
 const session = computed(() => getSession())
 
 const mode = ref('table') // 'table' | 'infinite'
 const error = ref('')
+const toasts = ref([])
 
 const tablePageSize = 10
 const tableState = reactive({ page: 1, totalPages: 1, loading: false, items: [] })
 const feedState = reactive({ page: 0, totalPages: 1, loading: false, items: [] })
+const wishlist = ref([])
 
 const sentinel = ref(null)
 let observer = null
@@ -128,7 +133,37 @@ const setupObserver = () => {
   observer.observe(sentinel.value)
 }
 
+const addToast = (message, type = 'info') => {
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now()
+  toasts.value.push({ id, message, type })
+  setTimeout(() => removeToast(id), 3500)
+}
+
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id)
+}
+
+const toggleWish = (movie) => {
+  const normalized = {
+    id: movie.id,
+    title: movie.title || movie.name || movie.original_title,
+    poster: movie.poster_path ? imageUrl(movie.poster_path) : '',
+    overview: movie.overview,
+    release_date: movie.release_date,
+    vote_average: movie.vote_average,
+  }
+  const before = wishlist.value.some((m) => m.id === movie.id)
+  wishlist.value = toggleWishlist(normalized)
+  addToast(before ? '찜 목록에서 제거되었습니다.' : '찜한 리스트에 추가되었습니다.', before ? 'info' : 'success')
+}
+
+const goDetail = (movie) => {
+  router.push({ name: 'detail', params: { id: movie.id } })
+}
+
 onMounted(() => {
+  wishlist.value = getWishlist()
   switchMode('table')
   setupObserver()
 })
@@ -173,19 +208,16 @@ watch(sentinel, () => setupObserver())
         <h2>대세 콘텐츠 (Table)</h2>
       </div>
       <div class="table-grid">
-        <div v-for="movie in tableState.items" :key="movie.id" class="tile">
-          <div class="poster">
-            <img :src="imageUrl(movie.poster_path)" :alt="movie.title || movie.name" />
-          </div>
-          <div class="copy">
-            <h3>{{ movie.title || movie.name }}</h3>
-            <p class="meta-line">
-              <span v-if="movie.vote_average">★ {{ movie.vote_average.toFixed(1) }}</span>
-              <span v-if="movie.release_date">{{ movie.release_date }}</span>
-            </p>
-            <p class="overview">{{ movie.overview || '줄거리가 제공되지 않았습니다.' }}</p>
-          </div>
-        </div>
+        <MovieCard
+          v-for="movie in tableState.items"
+          :key="movie.id"
+          :movie="movie"
+          :poster-url="imageUrl(movie.poster_path)"
+          :in-wishlist="wishlist.some((m) => m.id === movie.id)"
+          @toggle="toggleWish"
+          @view="goDetail"
+          @detail="goDetail"
+        />
       </div>
       <div class="pager bottom">
         <button type="button" :disabled="tableState.page <= 1 || tableState.loading" @click="loadTablePage(tableState.page - 1)">
@@ -209,26 +241,23 @@ watch(sentinel, () => setupObserver())
         <span class="pill">자동 로드</span>
       </div>
       <div class="feed">
-        <div v-for="movie in feedState.items" :key="movie.id" class="tile wide">
-          <div class="poster">
-            <img :src="imageUrl(movie.poster_path)" :alt="movie.title || movie.name" loading="lazy" />
-            <span class="rating" v-if="movie.vote_average">★ {{ movie.vote_average.toFixed(1) }}</span>
-          </div>
-          <div class="copy">
-            <h3>{{ movie.title || movie.name }}</h3>
-            <p class="meta-line">
-              <span v-if="movie.release_date">개봉 {{ movie.release_date }}</span>
-              <span v-if="movie.vote_average">평점 {{ movie.vote_average.toFixed(1) }}</span>
-            </p>
-            <p class="overview">{{ movie.overview || '줄거리가 제공되지 않았습니다.' }}</p>
-          </div>
-        </div>
+        <MovieCard
+          v-for="movie in feedState.items"
+          :key="movie.id"
+          :movie="movie"
+          :poster-url="imageUrl(movie.poster_path)"
+          :in-wishlist="wishlist.some((m) => m.id === movie.id)"
+          @toggle="toggleWish"
+          @view="goDetail"
+          @detail="goDetail"
+        />
         <div ref="sentinel" class="sentinel" />
         <div v-if="feedState.loading" class="spinner">Loading...</div>
       </div>
     </section>
 
     <button v-if="mode === 'infinite'" class="top" type="button" @click="backToTop">Top</button>
+    <ToastStack :items="toasts" @dismiss="removeToast" />
   </main>
 </template>
 

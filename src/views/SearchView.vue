@@ -2,7 +2,10 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
+import MovieCard from '../components/MovieCard.vue'
+import ToastStack from '../components/ToastStack.vue'
 import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
 const session = computed(() => getSession())
@@ -48,7 +51,9 @@ const state = reactive({
   items: [],
   page: 1,
   totalPages: 1,
+  wishlist: [],
 })
+const toasts = ref([])
 
 const imageUrl = (path) => (path ? `https://image.tmdb.org/t/p/w300${path}` : '')
 
@@ -167,11 +172,11 @@ const loadMovies = async (page = 1) => {
     params.set('sort_by', filters.sort)
     if (filters.genre) params.set('with_genres', filters.genre)
     if (filters.year) params.set('primary_release_year', filters.year)
-  if (filters.country) params.set('with_origin_country', filters.country)
-  params.set('certification_country', 'KR')
-  if (filters.certification) {
-    params.set('certification', filters.certification)
-  }
+    if (filters.country) params.set('with_origin_country', filters.country)
+    params.set('certification_country', 'KR')
+    if (filters.certification) {
+      params.set('certification', filters.certification)
+    }
   }
 
   try {
@@ -200,6 +205,28 @@ const resetFilters = () => {
   loadMovies(1)
 }
 
+const syncWishlist = () => {
+  state.wishlist = getWishlist()
+}
+
+const toggleWish = (movie) => {
+  const normalized = {
+    id: movie.id,
+    title: movie.title || movie.name || movie.original_title,
+    poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '',
+    overview: movie.overview,
+    release_date: movie.release_date,
+    vote_average: movie.vote_average,
+  }
+  const before = state.wishlist.some((m) => m.id === movie.id)
+  state.wishlist = toggleWishlist(normalized)
+  addToast(before ? '찜 목록에서 제거되었습니다.' : '찜한 리스트에 추가되었습니다.', before ? 'info' : 'success')
+}
+
+const goDetail = (movie) => {
+  router.push({ name: 'detail', params: { id: movie.id } })
+}
+
 const applyFilters = () => {
   loadMovies(1)
 }
@@ -220,8 +247,22 @@ watch(
 
 onMounted(() => {
   loadGenres()
+  syncWishlist()
   loadMovies(1)
 })
+
+const addToast = (message, type = 'info') => {
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Date.now()
+  toasts.value.push({ id, message, type })
+  setTimeout(() => removeToast(id), 3500)
+}
+
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id)
+}
 </script>
 
 <template>
@@ -280,27 +321,25 @@ onMounted(() => {
       </button>
     </div>
 
-    <section v-if="error" class="error">
-      <p>{{ error }}</p>
+    <section v-if="state.error" class="error">
+      <p>{{ state.error }}</p>
     </section>
 
     <section class="results">
-      <div v-if="state.loading" class="loading">검색 중...</div>
+      <div v-if="state.loading" class="grid skeleton">
+        <div v-for="n in 6" :key="n" class="sk-card" />
+      </div>
       <div v-else class="grid">
-        <article v-for="movie in state.items" :key="movie.id" class="card">
-          <div class="poster">
-            <img :src="imageUrl(movie.poster_path)" :alt="movie.title || movie.name" loading="lazy" />
-            <span class="badge" v-if="movie.vote_average">★ {{ movie.vote_average.toFixed(1) }}</span>
-          </div>
-          <div class="body">
-            <h3>{{ movie.title || movie.name }}</h3>
-            <p class="meta">
-              <span v-if="movie.release_date">{{ movie.release_date }}</span>
-              <span v-if="movie.vote_count">리뷰 {{ movie.vote_count }}</span>
-            </p>
-            <p class="overview">{{ movie.overview || '줄거리가 제공되지 않았습니다.' }}</p>
-          </div>
-        </article>
+        <MovieCard
+          v-for="movie in state.items"
+          :key="movie.id"
+          :movie="movie"
+          :poster-url="imageUrl(movie.poster_path)"
+          :in-wishlist="state.wishlist.some((m) => m.id === movie.id)"
+          @toggle="toggleWish"
+          @view="goDetail"
+          @detail="goDetail"
+        />
       </div>
       <div class="pager">
         <button type="button" :disabled="state.page <= 1 || state.loading" @click="loadMovies(state.page - 1)">
@@ -316,6 +355,7 @@ onMounted(() => {
         </button>
       </div>
     </section>
+    <ToastStack :items="toasts" @dismiss="removeToast" />
   </main>
 </template>
 
@@ -370,6 +410,13 @@ onMounted(() => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 800;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth);
+  will-change: transform;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
 }
 
 .ghost {
@@ -379,6 +426,8 @@ onMounted(() => {
   padding: 0.6rem 0.9rem;
   border-radius: 10px;
   cursor: pointer;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth), border-color 160ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .results {
@@ -399,73 +448,15 @@ onMounted(() => {
   gap: 0.8rem;
 }
 
-.card {
-  background: #101018;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.grid.skeleton {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+}
+
+.sk-card {
+  height: 320px;
   border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 260px;
-}
-
-.poster {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  background: #15151b;
-}
-
-.poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.poster .badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #ffd166;
-  padding: 0.35rem 0.55rem;
-  border-radius: 8px;
-  font-weight: 800;
-}
-
-.body {
-  padding: 0.65rem 0.75rem 0.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.meta {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.overview {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.helper {
-  color: #ff9da8;
-  font-size: 0.95rem;
-  font-weight: 700;
-  background: rgba(229, 9, 20, 0.08);
-  border: 1px solid rgba(229, 9, 20, 0.3);
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  animation: shimmer 1.2s ease-in-out infinite;
 }
 
 .sort-bar {
