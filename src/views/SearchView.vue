@@ -489,6 +489,17 @@ onMounted(() => {
   border-color: transparent;
 }
 
+.results {
+  background: rgba(15, 15, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .pager {
   display: flex;
   align-items: center;
@@ -517,9 +528,27 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .search-shell {
     width: calc(100% - 1rem);
+    padding: 0.6rem;
+    gap: 0.75rem;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .sort-bar {
+    flex-wrap: wrap;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .results {
+    padding: 0.6rem;
   }
 }
 </style>
