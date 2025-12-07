@@ -370,6 +370,13 @@ onMounted(() => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 800;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth);
+  will-change: transform;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
 }
 
 .ghost {
@@ -379,6 +386,8 @@ onMounted(() => {
   padding: 0.6rem 0.9rem;
   border-radius: 10px;
   cursor: pointer;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth), border-color 160ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .results {
@@ -408,6 +417,8 @@ onMounted(() => {
   flex-direction: column;
   width: 100%;
   max-width: 260px;
+  transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .poster {
@@ -420,6 +431,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 200ms var(--ease-smooth), filter 200ms var(--ease-smooth);
 }
 
 .poster .badge {
@@ -438,6 +450,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+}
+
+.card:hover .poster img {
+  transform: scale(1.03);
+  filter: brightness(1.05);
 }
 
 .meta {

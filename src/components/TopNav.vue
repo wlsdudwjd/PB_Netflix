@@ -81,12 +81,20 @@ const go = (name) => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
+  transition: transform 180ms var(--ease-smooth), box-shadow 180ms var(--ease-smooth), border-color 180ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .nav-links button.active {
   background: linear-gradient(120deg, #e50914, #b81d24);
   color: #fff;
   border-color: transparent;
+  box-shadow: 0 10px 24px rgba(229, 9, 20, 0.35);
+}
+
+.nav-links button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .right {

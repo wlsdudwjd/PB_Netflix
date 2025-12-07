@@ -117,6 +117,8 @@ onMounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
+  will-change: transform;
 }
 
 .poster {
@@ -129,6 +131,12 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
 }
 
 .body {
@@ -173,6 +181,13 @@ onMounted(() => {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 800;
+  transition: transform 160ms var(--ease-smooth), box-shadow 160ms var(--ease-smooth);
+  will-change: transform;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(229, 9, 20, 0.35);
 }
 
 @media (max-width: 768px) {
