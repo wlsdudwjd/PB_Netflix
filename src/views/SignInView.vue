@@ -226,7 +226,7 @@ onMounted(() => {
 
 <template>
   <main class="auth-shell">
-    <span class="brand">NETFLIX</span>
+    <span class="brand">JINFLIX</span>
     <div class="glow glow-1" />
     <div class="glow glow-2" />
 
