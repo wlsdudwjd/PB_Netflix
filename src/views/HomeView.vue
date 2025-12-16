@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import MovieCard from '../components/MovieCard.vue'
-import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { clearAuthState, getSession, getStoredUser } from '../utils/auth'
 import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
@@ -24,13 +24,12 @@ const sectionsConfig = [
   { key: 'now', title: '지금 상영 중', path: '/movie/now_playing' },
   { key: 'popular', title: '인기 급상승', path: '/movie/popular' },
   { key: 'top', title: '평점 TOP', path: '/movie/top_rated' },
-  { key: 'upcoming', title: '개봉 예정', path: '/movie/upcoming' },
 ]
 
 const imageUrl = (path) => (path ? `https://image.tmdb.org/t/p/w500${path}` : '')
 
 const handleLogout = () => {
-  clearSession()
+  clearAuthState()
   router.push('/signin')
 }
 
@@ -68,7 +67,7 @@ const loadMovies = async () => {
 
     const sectionPromises = sectionsConfig.map(async (section) => {
       const data = await fetchJson(section.path, apiKey)
-      const items = (data?.results || []).slice(0, 12)
+      const items = (data?.results || []).slice(0, 10)
       return { ...section, items }
     })
 
