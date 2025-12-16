@@ -2,7 +2,7 @@
 
 TMDB API를 활용해 로그인/회원가입, 인기/검색/위시리스트/상세 페이지를 제공하는 넷플릭스 스타일 영화 웹앱입니다. 로컬 스토리지에 세션/찜 목록을 저장하고, 카드 호버·전환 애니메이션, 테이블/인피니트 뷰 토글, 필터·정렬, 추천 영화 등 동적 UI를 포함합니다.
 
-Github repository 주소: https://github.com/wlsdudwjd/PB_Netflix
+Github repository 주소: https://github.com/wlsdudwjd/PB_Netflix <br>
 Github pages 주소: https://wlsdudwjd.github.io/PB_Netflix/
 
 ## 기술 스택
