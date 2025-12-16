@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import MovieCard from '../components/MovieCard.vue'
 import ToastStack from '../components/ToastStack.vue'
-import { clearSession, getSession } from '../utils/auth'
+import { clearAuthState, getSession } from '../utils/auth'
 import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
@@ -17,7 +17,7 @@ const state = reactive({
 const toasts = ref([])
 
 const handleLogout = () => {
-  clearSession()
+  clearAuthState()
   router.push('/signin')
 }
 

@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import MovieCard from '../components/MovieCard.vue'
-import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { clearAuthState, getSession, getStoredUser } from '../utils/auth'
 import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
@@ -29,7 +29,7 @@ const sectionsConfig = [
 const imageUrl = (path) => (path ? `https://image.tmdb.org/t/p/w500${path}` : '')
 
 const handleLogout = () => {
-  clearSession()
+  clearAuthState()
   router.push('/signin')
 }
 

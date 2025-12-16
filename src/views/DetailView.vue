@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import ToastStack from '../components/ToastStack.vue'
 import MovieCard from '../components/MovieCard.vue'
-import { clearSession, getSession, getStoredUser } from '../utils/auth'
+import { clearAuthState, getSession, getStoredUser } from '../utils/auth'
 import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const route = useRoute()
@@ -29,7 +29,7 @@ const isWished = computed(() =>
 const imageUrl = (path) => (path ? `https://image.tmdb.org/t/p/w500${path}` : '')
 
 const handleLogout = () => {
-  clearSession()
+  clearAuthState()
   router.push('/signin')
 }
 
