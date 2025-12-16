@@ -24,7 +24,6 @@ const sectionsConfig = [
   { key: 'now', title: '지금 상영 중', path: '/movie/now_playing' },
   { key: 'popular', title: '인기 급상승', path: '/movie/popular' },
   { key: 'top', title: '평점 TOP', path: '/movie/top_rated' },
-  { key: 'upcoming', title: '개봉 예정', path: '/movie/upcoming' },
 ]
 
 const imageUrl = (path) => (path ? `https://image.tmdb.org/t/p/w500${path}` : '')
