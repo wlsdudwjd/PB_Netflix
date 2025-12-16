@@ -52,6 +52,7 @@ const state = reactive({
   page: 1,
   totalPages: 1,
   wishlist: [],
+  initialized: false,
 })
 const toasts = ref([])
 
@@ -228,6 +229,7 @@ const goDetail = (movie) => {
 }
 
 const applyFilters = () => {
+  state.initialized = true
   loadMovies(1)
 }
 
@@ -237,18 +239,23 @@ const handleSubmit = () => {
 
 watch(
   () => [filters.genre, filters.year, filters.country, filters.certification],
-  () => applyFilters(),
+  () => {
+    if (!state.initialized) return
+    applyFilters()
+  },
 )
 
 watch(
   () => filters.sort,
-  () => applyFilters(),
+  () => {
+    if (!state.initialized) return
+    applyFilters()
+  },
 )
 
 onMounted(() => {
   loadGenres()
   syncWishlist()
-  loadMovies(1)
 })
 
 const addToast = (message, type = 'info') => {
@@ -268,6 +275,10 @@ const removeToast = (id) => {
 <template>
   <main class="search-shell">
     <TopNav :active="'search'" :email="session?.email" @logout="handleLogout" />
+
+    <section v-if="!state.initialized" class="intro">
+      <h1>어떤 영화를 검색하고 싶나요?</h1>
+    </section>
 
     <form class="filter-bar" @submit.prevent="handleSubmit">
       <input
@@ -304,58 +315,60 @@ const removeToast = (id) => {
       </div>
     </form>
 
-    <div class="sort-bar">
-      <span>정렬:</span>
-      <button
-        v-for="option in [
-          { label: '인기순', value: 'popularity.desc' },
-          { label: '평점순', value: 'vote_average.desc' },
-          { label: '개봉일순', value: 'release_date.desc' },
-        ]"
-        :key="option.value"
-        :class="{ active: filters.sort === option.value }"
-        type="button"
-        @click="() => { filters.sort = option.value; loadMovies(1) }"
-      >
-        {{ option.label }}
-      </button>
-    </div>
-
-    <section v-if="state.error" class="error">
-      <p>{{ state.error }}</p>
-    </section>
-
-    <section class="results">
-      <div v-if="state.loading" class="grid skeleton">
-        <div v-for="n in 6" :key="n" class="sk-card" />
-      </div>
-      <div v-else class="grid">
-        <MovieCard
-          v-for="movie in state.items"
-          :key="movie.id"
-          :movie="movie"
-          :poster-url="imageUrl(movie.poster_path)"
-          :in-wishlist="state.wishlist.some((m) => m.id === movie.id)"
-          @toggle="toggleWish"
-          @view="goDetail"
-          @detail="goDetail"
-        />
-      </div>
-      <div class="pager">
-        <button type="button" :disabled="state.page <= 1 || state.loading" @click="loadMovies(state.page - 1)">
-          이전
-        </button>
-        <span>{{ state.page }} / {{ state.totalPages }}</span>
+    <template v-if="state.initialized">
+      <div class="sort-bar">
+        <span>정렬:</span>
         <button
+          v-for="option in [
+            { label: '인기순', value: 'popularity.desc' },
+            { label: '평점순', value: 'vote_average.desc' },
+            { label: '개봉일순', value: 'release_date.desc' },
+          ]"
+          :key="option.value"
+          :class="{ active: filters.sort === option.value }"
           type="button"
-          :disabled="state.page >= state.totalPages || state.loading"
-          @click="loadMovies(state.page + 1)"
+          @click="() => { filters.sort = option.value; loadMovies(1) }"
         >
-          다음
+          {{ option.label }}
         </button>
       </div>
-    </section>
-    <ToastStack :items="toasts" @dismiss="removeToast" />
+
+      <section v-if="state.error" class="error">
+        <p>{{ state.error }}</p>
+      </section>
+
+      <section class="results">
+        <div v-if="state.loading" class="grid skeleton">
+          <div v-for="n in 6" :key="n" class="sk-card" />
+        </div>
+        <div v-else class="grid">
+          <MovieCard
+            v-for="movie in state.items"
+            :key="movie.id"
+            :movie="movie"
+            :poster-url="imageUrl(movie.poster_path)"
+            :in-wishlist="state.wishlist.some((m) => m.id === movie.id)"
+            @toggle="toggleWish"
+            @view="goDetail"
+            @detail="goDetail"
+          />
+        </div>
+        <div class="pager">
+          <button type="button" :disabled="state.page <= 1 || state.loading" @click="loadMovies(state.page - 1)">
+            이전
+          </button>
+          <span>{{ state.page }} / {{ state.totalPages }}</span>
+          <button
+            type="button"
+            :disabled="state.page >= state.totalPages || state.loading"
+            @click="loadMovies(state.page + 1)"
+          >
+            다음
+          </button>
+        </div>
+      </section>
+      <ToastStack :items="toasts" @dismiss="removeToast" />
+    </template>
   </main>
 </template>
 
@@ -370,6 +383,19 @@ const removeToast = (id) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.intro {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.intro h1 {
+  font-size: clamp(5rem, 5vw, 2.8rem);
+  margin: 0;
 }
 
 .filter-bar {

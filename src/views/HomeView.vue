@@ -67,7 +67,7 @@ const loadMovies = async () => {
 
     const sectionPromises = sectionsConfig.map(async (section) => {
       const data = await fetchJson(section.path, apiKey)
-      const items = (data?.results || []).slice(0, 12)
+      const items = (data?.results || []).slice(0, 10)
       return { ...section, items }
     })
 
