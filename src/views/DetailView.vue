@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import ToastStack from '../components/ToastStack.vue'
@@ -10,7 +10,7 @@ import { getWishlist, toggleWishlist } from '../utils/wishlist'
 const route = useRoute()
 const router = useRouter()
 const session = computed(() => getSession())
-const movieId = route.params.id
+const movieId = ref(route.params.id)
 
 const state = reactive({
   loading: true,
@@ -45,7 +45,7 @@ const fetchJson = async (path, apiKey) => {
   return json
 }
 
-const loadMovie = async () => {
+const loadMovie = async (id = movieId.value) => {
   const apiKey = getStoredUser()?.password
   if (!apiKey) {
     router.push('/signin')
@@ -54,13 +54,13 @@ const loadMovie = async () => {
   state.loading = true
   state.error = ''
   try {
-    const data = await fetchJson(`/movie/${movieId}`, apiKey)
+    const data = await fetchJson(`/movie/${id}`, apiKey)
     state.movie = data
     state.cast = (data?.credits?.cast || []).slice(0, 10)
     state.crew = (data?.credits?.crew || []).filter((c) =>
       ['Director', 'Screenplay', 'Writer', 'Story', 'Characters'].includes(c.job),
     )
-    const rec = await fetchJson(`/movie/${movieId}/recommendations`, apiKey)
+    const rec = await fetchJson(`/movie/${id}/recommendations`, apiKey)
     state.recommendations = (rec?.results || []).slice(0, 3)
   } catch (error) {
     state.error = error?.message || '영화 정보를 불러오지 못했습니다.'
@@ -99,6 +99,15 @@ const toggleWish = (target = null) => {
 onMounted(() => {
   loadMovie()
 })
+
+watch(
+  () => route.params.id,
+  (id) => {
+    if (!id || id === movieId.value) return
+    movieId.value = id
+    loadMovie(id)
+  },
+)
 </script>
 
 <template>
