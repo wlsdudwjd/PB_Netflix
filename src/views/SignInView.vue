@@ -226,7 +226,7 @@ onMounted(() => {
 
 <template>
   <main class="auth-shell">
-    <span class="brand">NETFLIX</span>
+    <span class="brand">JINFLIX</span>
     <div class="glow glow-1" />
     <div class="glow glow-2" />
 
@@ -290,7 +290,7 @@ onMounted(() => {
           <div class="options">
             <label class="checkbox">
               <input v-model="loginForm.remember" type="checkbox" />
-              <span>Remember me (아이디 저장)</span>
+              <span>아이디 저장</span>
             </label>
             <label class="checkbox">
               <input v-model="loginForm.autoLogin" type="checkbox" />

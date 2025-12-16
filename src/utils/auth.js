@@ -39,6 +39,11 @@ export const clearSession = () => {
   localStorage.removeItem(SESSION_KEY)
 }
 
+export const clearUser = () => {
+  if (typeof localStorage === 'undefined') return
+  localStorage.removeItem(USER_KEY)
+}
+
 export const isAuthenticated = () => Boolean(getSession())
 
 export const rememberUser = (credentials) => {
@@ -57,4 +62,18 @@ export const getRememberedUser = () => {
 export const clearRememberedUser = () => {
   if (typeof localStorage === 'undefined') return
   localStorage.removeItem(REMEMBER_KEY)
+}
+
+export const disableAutoLogin = () => {
+  if (typeof localStorage === 'undefined') return
+  const remembered = getRememberedUser()
+  if (remembered) {
+    rememberUser({ ...remembered, autoLogin: false })
+  }
+}
+
+export const clearAuthState = () => {
+  if (typeof localStorage === 'undefined') return
+  clearSession()
+  disableAutoLogin()
 }

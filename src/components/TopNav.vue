@@ -25,7 +25,7 @@ const go = (name) => {
 <template>
   <header class="topbar">
     <div class="left">
-      <div class="logo">JINFLIX</div>
+      <button class="logo" type="button" @click="go('home')">JINFLIX</button>
       <nav class="nav-links">
         <button :class="{ active: active === 'home' }" @click="go('home')">홈</button>
         <button :class="{ active: active === 'popular' }" @click="go('popular')">대세 콘텐츠</button>
@@ -65,6 +65,9 @@ const go = (name) => {
   font-size: clamp(1.5rem, 3vw, 1.9rem);
   letter-spacing: 0.12em;
   color: var(--accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .nav-links {

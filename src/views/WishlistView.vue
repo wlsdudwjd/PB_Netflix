@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import TopNav from '../components/TopNav.vue'
 import MovieCard from '../components/MovieCard.vue'
 import ToastStack from '../components/ToastStack.vue'
-import { clearSession, getSession } from '../utils/auth'
+import { clearAuthState, getSession } from '../utils/auth'
 import { getWishlist, toggleWishlist } from '../utils/wishlist'
 
 const router = useRouter()
@@ -17,7 +17,7 @@ const state = reactive({
 const toasts = ref([])
 
 const handleLogout = () => {
-  clearSession()
+  clearAuthState()
   router.push('/signin')
 }
 
@@ -131,62 +131,16 @@ onMounted(() => {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.6rem;
+  justify-content: start;
+  width: fit-content;
+  max-width: 100%;
 }
 
-.card {
-  background: #101018;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
-  will-change: transform;
-}
-
-.poster {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  background: #15151b;
-}
-
-.poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
-}
-
-.body {
-  padding: 0.65rem 0.75rem 0.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.meta {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.overview {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+:deep(.card) {
+  max-width: 220px;
+  margin: 0;
 }
 
 .empty {
@@ -224,10 +178,16 @@ onMounted(() => {
 
   .grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    width: 100%;
+    gap: 0.5rem;
   }
 
   .results {
     padding: 0.6rem;
+  }
+
+  :deep(.card) {
+    max-width: 190px;
   }
 }
 </style>
