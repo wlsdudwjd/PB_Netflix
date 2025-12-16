@@ -22,7 +22,8 @@ const mode = ref('table') // 'table' | 'infinite'
 const error = ref('')
 const toasts = ref([])
 
-const tablePageSize = 10
+const DEFAULT_TABLE_SIZE = 10
+const tablePageSize = ref(DEFAULT_TABLE_SIZE)
 const tableState = reactive({ page: 1, totalPages: 1, loading: false, items: [] })
 const feedState = reactive({ page: 0, totalPages: 1, loading: false, items: [] })
 const wishlist = ref([])
@@ -63,7 +64,7 @@ const loadTablePage = async (page = 1) => {
 
   try {
     const data = await fetchJson(`/movie/popular?page=${page}`, apiKey)
-    tableState.items = (data?.results || []).slice(0, tablePageSize)
+    tableState.items = (data?.results || []).slice(0, tablePageSize.value)
     tableState.page = page
     tableState.totalPages = data?.total_pages || 1
   } catch (err) {
@@ -166,6 +167,15 @@ onMounted(() => {
   wishlist.value = getWishlist()
   switchMode('table')
   setupObserver()
+  if (typeof window !== 'undefined') {
+    const syncSize = () => {
+      tablePageSize.value = window.matchMedia('(max-width: 640px)').matches ? 4 : DEFAULT_TABLE_SIZE
+    }
+    syncSize()
+    window.addEventListener('resize', syncSize)
+    // cleanup in onBeforeUnmount
+    onBeforeUnmount(() => window.removeEventListener('resize', syncSize))
+  }
 })
 
 onBeforeUnmount(() => {
