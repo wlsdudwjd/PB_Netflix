@@ -438,6 +438,7 @@ watch(sentinel, () => setupObserver())
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow: visible;
 }
 
 .pager {
@@ -764,7 +765,7 @@ watch(sentinel, () => setupObserver())
   }
 
   .table-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     max-height: none;
     overflow: visible;
