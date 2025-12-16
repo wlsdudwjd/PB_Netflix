@@ -186,14 +186,14 @@ watch(sentinel, () => setupObserver())
             aria-label="Table view"
             @click="switchMode('table')"
           >
-            📋
+            테이블
           </button>
           <button
             :class="{ active: mode === 'infinite' }"
             aria-label="Infinite scroll view"
             @click="switchMode('infinite')"
           >
-            ∞
+            스크롤
           </button>
         </nav>
       </template>
@@ -238,7 +238,6 @@ watch(sentinel, () => setupObserver())
     <section v-else class="infinite-wrap">
       <div class="row-head">
         <h2>대세 콘텐츠</h2>
-        <span class="pill">자동 로드</span>
       </div>
       <div class="feed">
         <article
@@ -296,9 +295,9 @@ watch(sentinel, () => setupObserver())
 }
 
 .popular-shell.table-mode {
-  min-height: 100vh;
-  height: 100vh;
-  overflow: hidden;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
 }
 
 .topbar {

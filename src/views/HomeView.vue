@@ -159,7 +159,6 @@ const goDetail = (movie) => {
       <article v-for="section in state.sections" :key="section.key" class="row">
         <header class="row-head">
           <h2>{{ section.title }}</h2>
-          <span class="pill">TMDB</span>
         </header>
         <div class="cards">
           <MovieCard
