@@ -765,10 +765,15 @@ watch(sentinel, () => setupObserver())
   }
 
   .table-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     max-height: none;
     overflow: visible;
+  }
+
+  /* 모바일 테이블뷰에서는 포스터만 노출 */
+  .table-grid :deep(.body) {
+    display: none;
   }
 
   .pager.bottom {
